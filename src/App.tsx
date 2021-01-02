@@ -1,26 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useEffect, useState} from 'react';
+// @ts-ignore
+import Toolbar from './components/Toolbar';
+import {Scene3d} from './components/Scene3d/Scene3d';
+import GraphStore from './modules/store';
+import {GraphVisual} from './types/3d';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	const [graphView, setGraphView] = useState<GraphVisual | null>(null);
+
+	useEffect(() => {
+		fetch('example.graphml')
+			.then(data => data.text())
+			.then(xml => {
+				GraphStore.setData(xml);
+				setGraphView(GraphStore.graphView);
+			});
+	}, []);
+
+    // @ts-ignore
+    return (
+    	<>
+			<Toolbar />
+			{graphView && (
+				<Scene3d graph={graphView}
+						 colorVertex={'yellow'}
+						 colorVertex={'yellow'}
+						 colorVertex={'yellow'}
+				/>
+			)}
+		</>
+    );
 }
 
 export default App;
