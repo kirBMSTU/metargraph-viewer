@@ -12,8 +12,8 @@ export default (graph: UndirectedGraph): GraphVisual => {
 		const vertex: Vertex = {
 			id,
 			x: randCord(),
-			y: randCord(),
-			z: randCord(),
+			y: randCord() - 5,
+			z: randCord() - 10,
 		};
 
 		return vertex;

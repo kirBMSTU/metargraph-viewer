@@ -1,26 +1,34 @@
-import React, {useRef} from 'react';
-import {initScene} from './3d';
+import React, {useRef, useState} from 'react';
+import {Scene} from './3d/Scene';
 import {GraphVisual} from '../../types/3d';
 
 interface Props {
 	graph: GraphVisual;
-	colorVertex?: string;
-	colorEdge?: string;
+	colorVertex: string;
+	colorEdge: string;
 	colorBackground?: string;
 }
 
-export const Scene3d: React.FC<Props> = ({graph, colorBackground = 'lightgrey', colorEdge = 'yellow', colorVertex = 'black'}: Props) => {
+export const Scene3d: React.FC<Props> = ({graph, colorBackground = '#ddd', colorEdge, colorVertex}: Props) => {
 	const ref = useRef<HTMLDivElement>(null);
+	const [scene, setScene] = useState(new Scene({ graph, colorVertex, colorEdge }));
 
 	React.useEffect(() => {
 		if (ref.current) {
-			ref.current!.innerHTML = `<a-scene background="color: #ddd"></a-scene>`;
+			ref.current!.innerHTML = `<a-scene background="color: ${colorBackground};"></a-scene>`;
+			scene.render();
 		}
 	}, []);
 
 	React.useEffect(() => {
-		initScene(graph);
-	}, [graph]);
+		const sceneEl = ref.current?.querySelector('a-scene');
+		sceneEl?.setAttribute('background', `color: ${colorBackground};`);
+	}, [colorBackground]);
+
+	// TODO: effect on graph change
+
+	React.useEffect(() => scene.setEdgeColor(colorEdge), [colorEdge]);
+	React.useEffect(() => scene.setVertexColor(colorVertex), [colorVertex]);
 
 	// @ts-ignore
 	return (
