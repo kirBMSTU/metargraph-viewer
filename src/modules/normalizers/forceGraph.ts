@@ -5,7 +5,7 @@ import {GraphData, LinkObject, NodeObject} from 'react-force-graph-3d';
 const graphVisualToForceGraphNode = (vertex: Vertex, color: string): NodeObject & { color: string; content?: string; } => ({
     id: vertex.id,
     content: vertex.content,
-    color
+    color,
     // x: vertex.x,
     // y: vertex.y,
     // z: vertex.z,
