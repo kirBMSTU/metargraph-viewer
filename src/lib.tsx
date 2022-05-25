@@ -1,7 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App, { Mode } from './App';
+import MetagraphViewer from './library';
 
-type MetagraphViewer = {
+declare global {
+    interface Window {
+        MetagraphViewer: typeof MetagraphViewer; 
+        MV: typeof MetagraphViewer; 
+    }
+}
 
-};
+// TODO: сделать сборку для esm, umd
+window.MetagraphViewer = MetagraphViewer;
+window.MV = MetagraphViewer;

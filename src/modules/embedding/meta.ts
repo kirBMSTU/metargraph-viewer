@@ -4,7 +4,8 @@ import { BOUNDARY_SIZE } from '../../constants';
 
 const randCord = () => Math.random() * BOUNDARY_SIZE;
 
-export default (graph: UndirectedGraph, expandedNodes: string[]): GraphVisual => {
+/** @deprecated */
+const meta = (graph: UndirectedGraph, expandedNodes: string[]): GraphVisual => {
     const verticesEntries = [...graph.nodeEntries()];
 
     const vertices = verticesEntries.map(({ node: id }) => {
@@ -17,14 +18,14 @@ export default (graph: UndirectedGraph, expandedNodes: string[]): GraphVisual =>
 
         return vertex;
     }).filter((vertex: Vertex) => {
-        const match = vertex.id.match(/(.*)\:\:.*/);
+        const match = vertex.id.match(/(.*)::.*/);
         const isComplex = Boolean(match);
 
         if (!isComplex) {
             return true;
         }
 
-        const [_, parent] = match || [];
+        const [, parent] = match || [];
         return expandedNodes.includes(parent);
     });
 
@@ -46,8 +47,8 @@ export default (graph: UndirectedGraph, expandedNodes: string[]): GraphVisual =>
         })
         .filter(edge => edge !== null)
         .filter(edge => {
-            const match1 = edge?.v1.id.match(/(.*)\:\:.*/);
-            const match2 = edge?.v2.id.match(/(.*)\:\:.*/);
+            const match1 = edge?.v1.id.match(/(.*)::.*/);
+            const match2 = edge?.v2.id.match(/(.*)::.*/);
             const isComplex1 = Boolean(match1);
             const isComplex2 = Boolean(match2);
             
@@ -67,3 +68,5 @@ export default (graph: UndirectedGraph, expandedNodes: string[]): GraphVisual =>
         edges,
     } as GraphVisual;
 };
+
+export default meta;

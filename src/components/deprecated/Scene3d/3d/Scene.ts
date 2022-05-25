@@ -1,7 +1,6 @@
 import createVertex from './createVertex';
 import createEdge from './createEdge';
-// @ts-ignore
-import {GraphVisual} from '../../../types/3d';
+import {GraphVisual} from '../../../../types/3d';
 
 interface Params {
 	graph: GraphVisual;

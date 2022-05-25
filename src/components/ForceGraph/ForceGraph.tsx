@@ -1,25 +1,19 @@
 import { observer } from 'mobx-react-lite';
 import React, { useRef, useEffect, useCallback } from 'react';
-import ForceGraph3D, { GraphData, ForceGraphMethods, NodeObject } from 'react-force-graph-3d';
+import ForceGraph3D, { GraphData, ForceGraphMethods, NodeObject, LinkObject } from 'react-force-graph-3d';
 import { useThemeStore } from '../../modules/store/ThemeStore';
 import ThreeForceGraph from 'three-forcegraph';
 import * as THREE from 'three';
 import * as d3 from 'd3';
-
-type Props = {
-    data: GraphData;
-    onNodeClick: (id?: string | number) => void;
-    checkNodeVisibility: (id?: string | number) => boolean;
-    getNodeSize: (id?: string | number) => number;
-    getNested: (id?: string | number) => GraphData;
-};
+import { useGraphStore } from '../../modules/store/GraphStore';
 
 
-function customFn() {
+/** Сила, которая направляет все вершины-дети к их раскрытым родителям */
+function forceNestedToParents() {
     let nodes: NodeObject[];
   
     function force(alpha: number) {
-        nodes?.forEach(vertex => {
+        nodes?.forEach((vertex: NodeObject) => {
             const [, parentId] = String(vertex.id)?.match(/(.*)::.*/) || [];
             const parent = nodes.find(v => v.id === parentId);
 
@@ -35,17 +29,18 @@ function customFn() {
   
     function initialize() {}
   
-    force.initialize = function(_nodes: any[]) {
+    force.initialize = function(_nodes: NodeObject[]) {
         nodes = _nodes;
         initialize();
     };
   
     return force;
-  }
+}
 
-export const ForceGraph: React.FC<Props> = observer((props: Props) => {
+const ForceGraph: React.FC = () => {
     const graphRef = useRef<ForceGraphMethods | undefined>();
     const { colorBackground, colorVertex } = useThemeStore();
+    const { expandNode, getNested, graphDataNormalized } = useGraphStore();
 
     useEffect(() => {
         const fg = graphRef.current as ForceGraphMethods;
@@ -53,23 +48,25 @@ export const ForceGraph: React.FC<Props> = observer((props: Props) => {
         if (!fg) return;
 
         // @ts-ignore
-        fg.d3Force('charge', d3.forceManyBody().strength((vertex) => {
+        fg.d3Force('charge', d3.forceManyBody().strength((vertex: NodeObject) => {
             // @ts-ignore
             const match = vertex.id.match(/(.*)::.*/);
         
             return match ? -1500 : -1500;
         }));
 
-        fg.d3Force('center', customFn());
+        fg.d3Force('center', forceNestedToParents());
 
         // @ts-ignore
-        fg.d3Force('link').distance(link => {
+        fg.d3Force('link').distance((link: LinkObject) => {
+            console.log('force', link);
+
             const { source, target } = link;
 
-            const sourceNested = getNested(source);
+            const sourceNested = getNested(source as NodeObject);
             const sourceHasNested = Boolean(sourceNested.nodes.length);
             
-            const targetNested = getNested(target);
+            const targetNested = getNested(target as NodeObject);
             const targetHasNested = Boolean(targetNested.nodes.length);
 
             const distance = sourceHasNested || targetHasNested ? 250 : 10;
@@ -77,22 +74,19 @@ export const ForceGraph: React.FC<Props> = observer((props: Props) => {
         });
     }, [graphRef.current]);
 
-    const onNodeClick = useCallback((node: NodeObject) => { props.onNodeClick(node.id) }, [props, props.onNodeClick]);
-    const getNested = useCallback((node: NodeObject) => props.getNested(node.id), [props, props.getNested]);
-
     return (
         <ForceGraph3D
             ref={graphRef}
             numDimensions={3}
             nodeLabel='id'
-            graphData={props.data}
+            graphData={graphDataNormalized}
             linkOpacity={1}
             backgroundColor={colorBackground}
             linkWidth={1}
-            onNodeClick={onNodeClick}
+            onNodeClick={expandNode}
             showNavInfo={false}
             nodeThreeObject={
-                (vertex) => {
+                (vertex: NodeObject) => {
                     const group = new THREE.Group();
 
                     const nested = getNested(vertex);
@@ -116,7 +110,7 @@ export const ForceGraph: React.FC<Props> = observer((props: Props) => {
 
                     const nestedGraph = new ThreeForceGraph()
                         .nodeRelSize(4)
-                        .linkColor('yellow')
+                        .linkColor('yellow') // todo fix
                         // @ts-ignore
                         .d3Force('charge', d3.forceManyBody().strength(-1500))
                         .graphData(nested);
@@ -127,4 +121,6 @@ export const ForceGraph: React.FC<Props> = observer((props: Props) => {
             }
         />
     )
-});
+};
+
+export default observer(ForceGraph)

@@ -1,2 +1,2 @@
-import { ForceGraph } from './ForceGraph';
+import ForceGraph from './ForceGraph';
 export default ForceGraph;

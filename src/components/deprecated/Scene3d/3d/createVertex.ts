@@ -1,4 +1,4 @@
-import {Cord} from '../../../types/3d';
+import {Cord} from '../../../../types/3d';
 
 export default function createVertex({x, y, z}: Cord, color: string = '#444'): HTMLElement {
     const entity = document.createElement('a-entity');
