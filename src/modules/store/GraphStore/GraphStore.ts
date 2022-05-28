@@ -29,9 +29,6 @@ class GraphStore implements ILocalStore {
     if (graphData) {
       this.setGraphData(graphData);
     }
-
-    // @ts-ignore
-    window.graphstore = this;
   }
 
   setGraphData = (data: string) => {

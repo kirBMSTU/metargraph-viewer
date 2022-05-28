@@ -1,12 +1,2 @@
-import './index.css';
-import { Mode } from './App';
-import MetagraphViewer from './library';
-
-new MetagraphViewer({
-  containerSelector: '#root',
-  data: {
-    type: MetagraphViewer.DataSourceKind.graphmlUrl,
-    url: 'example.graphml'
-  },
-  mode: Mode.demo
-});
+// @ts-ignore
+process.env.REACT_APP_BUILD_TARGET === 'lib' ? import(/* webpackChunkName: "lib" */'./lib') : import('./demo');
