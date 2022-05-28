@@ -89,4 +89,5 @@ export class MetagraphViewer {
     }
 
     static DataSourceKind = DataSourceKind;
+    static Mode = Mode;
 }
