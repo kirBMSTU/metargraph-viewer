@@ -31,7 +31,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "REACT_APP_BUILD_TARGET=lib react-scripts build",
+    "build": "REACT_APP_BUILD_TARGET=lib react-app-rewired build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "component": "node new-comp.js",
@@ -76,6 +76,8 @@
     "@types/three": "^0.140.0",
     "eslint": "^8.16.0",
     "eslint-plugin-react": "^7.30.0",
-    "gh-pages": "^4.0.0"
+    "gh-pages": "^4.0.0",
+    "react-app-rewired": "^2.2.1",
+    "rewire": "^6.0.0"
   }
 }
