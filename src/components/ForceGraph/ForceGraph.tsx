@@ -7,6 +7,22 @@ import * as THREE from 'three';
 import * as d3 from 'd3';
 import { useGraphStore } from '../../modules/store/GraphStore';
 
+/**
+ * Цвета вложенных вершин
+ */
+const NESTED_COLORS: string[] = [
+    'green',
+    'green',
+    'red',
+    'purple',
+    'yellow',
+    'lightblue',
+];
+
+const getNestedVertexColor = (level: number): string => NESTED_COLORS[level % NESTED_COLORS.length];
+
+const getNestedLevel = (node: NodeObject | string): number => String(typeof node === 'string' ? node : node.id).split('::').length;
+
 
 /** Сила, которая направляет все вершины-дети к их раскрытым родителям */
 function forceNestedToParents() {
@@ -18,7 +34,7 @@ function forceNestedToParents() {
             const parent = nodes.find(v => v.id === parentId);
 
             if (parent) {
-                const k = alpha * 0.5;
+                const k = alpha * 0.7;
 
                 vertex.x! += (parent.x! - vertex.x!) * k;
                 vertex.y! += (parent.y! - vertex.y!) * k;
@@ -39,8 +55,8 @@ function forceNestedToParents() {
 
 const ForceGraph: React.FC = () => {
     const graphRef = useRef<ForceGraphMethods | undefined>();
-    const { colorBackground, colorVertex } = useThemeStore();
-    const { expandNode, getNested, graphDataNormalized } = useGraphStore();
+    const { colorBackground, colorVertex, colorEdge } = useThemeStore();
+    const { expandNode, getNested, graphDataNormalized, maxExpandedNestedLevel } = useGraphStore();
 
     useEffect(() => {
         const fg = graphRef.current as ForceGraphMethods;
@@ -67,7 +83,12 @@ const ForceGraph: React.FC = () => {
             const targetNested = getNested(target as NodeObject);
             const targetHasNested = Boolean(targetNested.nodes.length);
 
-            const distance = sourceHasNested || targetHasNested ? 250 : 10;
+            const sourceNestedLevel = getNestedLevel(source as NodeObject);
+            const targetNestedLevel = getNestedLevel(source as NodeObject);
+
+            const radiusKoef = maxExpandedNestedLevel - Math.max(sourceNestedLevel, targetNestedLevel);
+
+            const distance = sourceHasNested || targetHasNested ? 300 * radiusKoef : 10;
             return distance;
         });
     }, [graphRef.current]);
@@ -77,44 +98,55 @@ const ForceGraph: React.FC = () => {
             ref={graphRef}
             numDimensions={3}
             nodeLabel='id'
+            linkLabel='edge'
             graphData={graphDataNormalized}
             linkOpacity={1}
+            linkColor={(link: LinkObject): string => {
+                const { source, target } = link;
+
+                const sourceNestedLevel = getNestedLevel(source as NodeObject);
+                const sourceIsNested = sourceNestedLevel > 1;
+
+                const targetNestedLevel = getNestedLevel(target as NodeObject);
+                const targetIsNested = targetNestedLevel > 1;
+
+                const maxLevel = Math.max(sourceNestedLevel, targetNestedLevel) - 1;
+
+                const color = sourceIsNested || targetIsNested ? getNestedVertexColor(maxLevel) : colorEdge;
+
+                return color;
+            }}
             backgroundColor={colorBackground}
             linkWidth={1}
+            linkDirectionalParticleWidth={6}
             onNodeClick={expandNode}
             showNavInfo={false}
+            linkDirectionalParticles={() => 10}
             nodeThreeObject={
                 (vertex: NodeObject) => {
-                    const group = new THREE.Group();
-
                     const nested = getNested(vertex);
                     const hasNested = Boolean(nested.nodes.length);
 
-                    const nestedLevel = String(vertex.id).split('::').length
+                    const nestedLevel = getNestedLevel(vertex);
+                    
+                    const radiusKoef = maxExpandedNestedLevel - nestedLevel;
+                    const sphereRadius = hasNested ? 200 * radiusKoef : 15;
+                    const sphereOpacity = hasNested ? 0.13 : 1;
 
-                    const sphereRadius = hasNested ? 200 * nestedLevel : 15;
-                    const sphereOpacity = hasNested ? 0.2 : 1;
+                    const isNested = nestedLevel > 1;
+
+                    const color = isNested ? getNestedVertexColor(nestedLevel - 1) : colorVertex;
 
                     // @ts-ignore
                     const geometry = new THREE.SphereGeometry(sphereRadius, 32, 16);
                     const material = new THREE.MeshBasicMaterial({
-                        color: colorVertex,
+                        color,
                         opacity: sphereOpacity,
                         transparent: hasNested,
                         wireframe: hasNested,
                     });
                     const sphere = new THREE.Mesh(geometry, material);
-                    group.add(sphere);
-
-                    const nestedGraph = new ThreeForceGraph()
-                        .nodeRelSize(4)
-                        .linkColor('yellow') // todo fix
-                        // @ts-ignore
-                        .d3Force('charge', d3.forceManyBody().strength(-1500))
-                        .graphData(nested);
-                    
-                    group.add(nestedGraph);
-                    return group;
+                    return sphere;
                 }
             }
         />

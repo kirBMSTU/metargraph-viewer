@@ -8,7 +8,8 @@ import { GraphData, NodeObject } from 'react-force-graph-3d';
 type PrivateFields = '_expandedNodes' | '_graphModel';
 
 /** Получить id вершины для начала/конца ребра. Нужно, тк там может быть как id, так и object */
-const getEdgesVertexID = (node: string | NodeObject): string => typeof node === 'string' ? node : String(node.id);
+const getEdgesVertexID = (node: string | NodeObject): string =>
+  typeof node === 'string' ? node : String(node.id);
 
 class GraphStore implements ILocalStore {
   private _graphModel: UndirectedGraph | null = null;
@@ -22,7 +23,7 @@ class GraphStore implements ILocalStore {
       setGraphData: action.bound,
       vertices: computed,
       edges: computed,
-      graphDataNormalized: computed
+      graphDataNormalized: computed,
     });
 
     if (graphData) {
@@ -46,54 +47,56 @@ class GraphStore implements ILocalStore {
 
   /** Получить содержимое метавершины */
   getNested = (vertex: NodeObject): GraphData => {
-    const nodes: NodeObject[] =
-      (this.allVertices.filter((v) => {
+    const nodes: NodeObject[] = (
+      this.allVertices.filter((v) => {
         const [, parentId] = v.node.match(/(.*)::.*/) || [];
         return Boolean(parentId === vertex.id) && this.isExpanded(parentId);
-      }) ?? []).map(({ node: id, attributes }) => ({...attributes, id}));
+      }) ?? []
+    ).map(({ node: id, attributes }) => ({ ...attributes, id }));
 
     const links =
       this.allEdges.filter(
-        (edge: EdgeEntry) => 
-          nodes.find((v: NodeObject) => v.id === getEdgesVertexID(edge?.source)) 
-          && nodes.find((v: NodeObject) => v.id === getEdgesVertexID(edge?.target))) ?? [];
+        (edge: EdgeEntry) =>
+          nodes.find(
+            (v: NodeObject) => v.id === getEdgesVertexID(edge?.source)
+          ) &&
+          nodes.find((v: NodeObject) => v.id === getEdgesVertexID(edge?.target))
+      ) ?? [];
 
-    console.log('getNested', links, nodes);
 
     return {
       links,
-      nodes
+      nodes,
     };
   };
 
   /** Все вершины метаграфа, вне зависимости от состояния родителей */
   get allVertices(): NodeEntry[] {
-    return [...this._graphModel?.nodeEntries() ?? [] as NodeEntry[]];
+    return [...(this._graphModel?.nodeEntries() ?? ([] as NodeEntry[]))];
   }
 
   /** Только видимые вершины (без скрытых внутри неразвернутых метавершин) */
   get vertices(): NodeEntry[] {
     const excludeCollapsed = this.allVertices.filter((vertex: NodeEntry) => {
-        const match = vertex.node.match(/(.*)::.*/);
-        const isNested = Boolean(match);
+      const match = vertex.node.match(/(.*)::.*/);
+      const isNested = Boolean(match);
 
-        if (!isNested) {
-            return true;
-        }
+      if (!isNested) {
+        return true;
+      }
 
-        return false;
+      // return false;
 
-        // const [, parentId] = match || [];
-        // return this._expandedNodes.has(parentId);
-    })
+      const [, parentId] = match || [];
+      return this._expandedNodes.has(parentId);
+    });
 
     return excludeCollapsed;
   }
 
   /** Все ребра метаграфа, вне зависимости от состояние вершин, которые они соединяют */
   get allEdges(): EdgeEntry[] {
-    console.log('allEdges');
-    return [...this._graphModel?.edgeEntries() ?? [] as EdgeEntry[]];
+    return [...(this._graphModel?.edgeEntries() ?? ([] as EdgeEntry[]))];
   }
 
   /**
@@ -101,40 +104,54 @@ class GraphStore implements ILocalStore {
    * (без ребер, начало и/или конец которых скрыты внутри неразвернутых метавершин)
    */
   get edges(): EdgeEntry[] {
-    console.log('all', this.allEdges);
     const existing = this.allEdges.filter((edge: EdgeEntry) => {
-      const hasSource = this.vertices.some((vertex: NodeEntry) => vertex.node === getEdgesVertexID(edge.source));
-      const hasTarget = this.vertices.some((vertex: NodeEntry) => vertex.node === getEdgesVertexID(edge.target));
+      const hasSource = this.vertices.some(
+        (vertex: NodeEntry) => vertex.node === getEdgesVertexID(edge.source)
+      );
+      const hasTarget = this.vertices.some(
+        (vertex: NodeEntry) => vertex.node === getEdgesVertexID(edge.target)
+      );
 
       return hasTarget && hasSource;
     });
-    console.log('existing', existing);
 
     const result = existing.filter((edge: EdgeEntry) => {
-      return true;
-      // const match1 = getEdgesVertexID(edge?.source).match?.(/(.*)::.*/);
-      // const match2 = getEdgesVertexID(edge?.target).match?.(/(.*)::.*/);
+      // return true;
+      const match1 = getEdgesVertexID(edge?.source).match?.(/(.*)::.*/);
+      const match2 = getEdgesVertexID(edge?.target).match?.(/(.*)::.*/);
 
-      // const isComplex1 = Boolean(match1);
-      // const isComplex2 = Boolean(match2);
-      
-      // if (!isComplex1 && !isComplex2) return true;
+      const isComplex1 = Boolean(match1);
+      const isComplex2 = Boolean(match2);
 
-      // const [, parent1] = match1 || [];
-      // const [, parent2] = match2 || [];
+      if (!isComplex1 && !isComplex2) return true;
 
-      // return this._expandedNodes.has(parent1) && this._expandedNodes.has(parent2);
+      const [, parent1] = match1 || [];
+      const [, parent2] = match2 || [];
+
+      return (
+        (this._expandedNodes.has(parent1) || !parent1) && (this._expandedNodes.has(parent2) || !parent2)
+      );
     });
-    console.log('edges', result);
     return result;
+  }
+
+  /** Максимальный уровень вложенности из раскрытых вершин */
+  get maxExpandedNestedLevel(): number {
+    return Math.max(
+      ...[...this._expandedNodes]
+        .map((node) => node.split('::').length)
+    ) + 1;
   }
 
   /** Данные о вершинах и ребрах метаграфа, нормализованные для react-force-graph-3d */
   get graphDataNormalized(): GraphData {
     return {
-      nodes: this.vertices.map(({ node: id, attributes }) => ({ ...attributes, id })),
-      links: this.edges
-    }
+      nodes: this.vertices.map(({ node: id, attributes }) => ({
+        ...attributes,
+        id,
+      })),
+      links: this.edges,
+    };
   }
 
   destroy(): void {}
