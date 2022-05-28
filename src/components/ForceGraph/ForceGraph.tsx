@@ -59,8 +59,6 @@ const ForceGraph: React.FC = () => {
 
         // @ts-ignore
         fg.d3Force('link').distance((link: LinkObject) => {
-            console.log('force', link);
-
             const { source, target } = link;
 
             const sourceNested = getNested(source as NodeObject);
