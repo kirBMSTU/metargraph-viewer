@@ -1,20 +1,16 @@
 {
   "files": {
-    "main.css": "/metagraph-viewer/static/css/main.08154824.chunk.css",
-    "main.js": "/metagraph-viewer/static/js/main.9c848c91.chunk.js",
-    "main.js.map": "/metagraph-viewer/static/js/main.9c848c91.chunk.js.map",
-    "runtime-main.js": "/metagraph-viewer/static/js/runtime-main.cab26cb3.js",
-    "runtime-main.js.map": "/metagraph-viewer/static/js/runtime-main.cab26cb3.js.map",
-    "static/js/2.338f072b.chunk.js": "/metagraph-viewer/static/js/2.338f072b.chunk.js",
-    "static/js/2.338f072b.chunk.js.map": "/metagraph-viewer/static/js/2.338f072b.chunk.js.map",
-    "index.html": "/metagraph-viewer/index.html",
-    "static/css/main.08154824.chunk.css.map": "/metagraph-viewer/static/css/main.08154824.chunk.css.map",
-    "static/js/2.338f072b.chunk.js.LICENSE.txt": "/metagraph-viewer/static/js/2.338f072b.chunk.js.LICENSE.txt"
+    "main.js": "/static/js/main.js",
+    "mv.js": "/static/js/mv.js",
+    "mv.css": "/static/css/mv.a128bf87.chunk.css",
+    "static/js/800.js": "/static/js/800.js",
+    "index.html": "/index.html",
+    "main.js.map": "/static/js/main.js.map",
+    "mv.js.map": "/static/js/mv.js.map",
+    "mv.a128bf87.chunk.css.map": "/static/css/mv.a128bf87.chunk.css.map",
+    "800.js.map": "/static/js/800.js.map"
   },
   "entrypoints": [
-    "static/js/runtime-main.cab26cb3.js",
-    "static/js/2.338f072b.chunk.js",
-    "static/css/main.08154824.chunk.css",
-    "static/js/main.9c848c91.chunk.js"
+    "static/js/main.js"
   ]
 }
