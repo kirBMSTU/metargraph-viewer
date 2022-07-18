@@ -1,35 +1,37 @@
-import React, {useEffect} from 'react';
-// @ts-ignore
+import React from 'react';
 import Toolbar from './components/Toolbar';
-import {Scene3d} from './components/Scene3d/Scene3d';
-import {observer} from 'mobx-react';
-import ThemeStore, {useThemeStore, ThemeStoreContext} from './modules/store/ThemeStore';
-import GraphStore, {useGraphStore, GraphStoreContext} from './modules/store/GraphStore';
+import { observer } from 'mobx-react';
+import ThemeStore, { ThemeStoreContext } from './modules/store/ThemeStore';
+import GraphStore, { GraphStoreContext } from './modules/store/GraphStore';
+import { useLocalStore } from './utils/useLocalStore';
+import ForceGraph from './components/ForceGraph';
 
-const App: React.FC = observer(() => {
-	const { graphView, setGraphData } = useGraphStore();
-	const { colorVertex, colorEdge, colorBackground } = useThemeStore();
-	useEffect(() => {
-		fetch('example.graphml')
-			.then(data => data.text())
-			.then(xml => setGraphData(xml));
-	}, []);
+/** Режим работы приложения */
+export enum Mode {
+  /** Режим библиотеки */
+  library = 'library',
+  /** Демо-режим */
+  demo = 'demo',
+}
 
-    // @ts-ignore
-    return (
-    	<ThemeStoreContext.Provider value={ThemeStore}>
-			<GraphStoreContext.Provider value={GraphStore}>
-				<Toolbar />
-				{graphView && (
-					<Scene3d graph={graphView}
-							 colorVertex={colorVertex}
-							 colorEdge={colorEdge}
-							 colorBackground={colorBackground}
-					/>
-				)}
-			</GraphStoreContext.Provider>
-		</ThemeStoreContext.Provider>
-    );
-});
+type Props = {
+  /** Режим работы приложения: Библиотека или Демо-режим */
+  mode: Mode;
+  /** Данные о вершинах и ребрах метаграфа в виде строки */
+  graphString: string;
+};
 
-export default App;
+const App: React.FC<Props> = ({ mode, graphString }: Props) => {
+  const graphStore = useLocalStore(() => new GraphStore(graphString));
+
+  return (
+    <ThemeStoreContext.Provider value={ThemeStore}>
+      <GraphStoreContext.Provider value={graphStore}>
+        {mode === Mode.demo && <Toolbar />}
+        <ForceGraph />
+      </GraphStoreContext.Provider>
+    </ThemeStoreContext.Provider>
+  );
+};
+
+export default observer(App);

@@ -1,6 +1,6 @@
 import React, {useRef, useState} from 'react';
 import {Scene} from './3d/Scene';
-import {GraphVisual} from '../../types/3d';
+import {GraphVisual} from '../../../types/3d';
 
 interface Props {
 	graph: GraphVisual;

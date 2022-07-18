@@ -10,9 +10,9 @@ export const Toolbar: React.FC = observer(() => {
 	const [colorVertexLocal, setColorVertexLocal] = useState(colorVertex);
 	const [colorEdgeLocal, setColorEdgeLocal] = useState(colorEdge);
 
-	const onColorBackgroundChange = (e: ChangeEvent<HTMLInputElement>) => setColorBackgroundLocal(e.target.value);
-	const onColorVertexChange = (e: ChangeEvent<HTMLInputElement>) => setColorVertexLocal(e.target.value);
-	const onColorEdgeChange = (e: ChangeEvent<HTMLInputElement>) => setColorEdgeLocal(e.target.value);
+	const onColorBackgroundChange = (e: ChangeEvent<HTMLInputElement>) => setColorBackgroundLocal(e?.target.value);
+	const onColorVertexChange = (e: ChangeEvent<HTMLInputElement>) => setColorVertexLocal(e?.target.value);
+	const onColorEdgeChange = (e: ChangeEvent<HTMLInputElement>) => setColorEdgeLocal(e?.target.value);
 
 	const onColorBackgroundBlur = () => setColorBackground(colorBackgroundLocal);
 	const onColorVertexBlur = () => setColorVertex(colorVertexLocal);

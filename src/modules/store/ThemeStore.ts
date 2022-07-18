@@ -2,9 +2,9 @@ import { makeAutoObservable } from 'mobx';
 import React, {useContext} from 'react';
 
 class ThemeStore {
-	public colorVertex: string = localStorage.getItem('colorVertex') || '#444';
-	public colorEdge: string = localStorage.getItem('colorEdge') || 'yellow';
-	public colorBackground: string = localStorage.getItem('colorBackground') || '#ddd';
+	public colorVertex: string = localStorage.getItem('colorVertex') || '#00e1ff';
+	public colorEdge: string = localStorage.getItem('colorEdge') || '#ffffff';
+	public colorBackground: string = localStorage.getItem('colorBackground') || '#000219';
 
 	constructor() {
 		makeAutoObservable(this);

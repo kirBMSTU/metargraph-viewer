@@ -1,4 +1,4 @@
-import {Cord} from '../../../types/3d';
+import {Cord} from '../../../../types/3d';
 
 export default function createEdge(cord1: Cord, cord2: Cord, color: string = 'yellow') {
     const { x: x1, y: y1, z: z1 } = cord1;

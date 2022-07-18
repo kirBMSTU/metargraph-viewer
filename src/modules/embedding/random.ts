@@ -5,10 +5,9 @@ import {BOUNDARY_SIZE} from '../../constants';
 const randCord = () => Math.random() * BOUNDARY_SIZE;
 
 export default (graph: UndirectedGraph): GraphVisual => {
-	// @ts-ignore
 	const verticesEntries = [...graph.nodeEntries()];
 
-	const vertices = verticesEntries.map(([id]: any[]) => {
+	const vertices = verticesEntries.map(({ node: id }) => {
 		const vertex: Vertex = {
 			id,
 			x: randCord(),
@@ -19,11 +18,10 @@ export default (graph: UndirectedGraph): GraphVisual => {
 		return vertex;
 	});
 
-	// @ts-ignore
 	const edgesEntries = [...graph.edgeEntries()];
 
 	const edges = edgesEntries
-		.map(([key, attrs, source, target]: any[]) => {
+		.map(({ source, target}) => {
 			const v1 = vertices.find(({id}) => id === source);
 			const v2 = vertices.find(({id}) => id === target);
 
